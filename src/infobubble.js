@@ -1,7 +1,6 @@
-// ==ClosureCompiler==
-// @compilation_level ADVANCED_OPTIMIZATIONS
-// @externs_url https://raw.githubusercontent.com/google/closure-compiler/master/contrib/externs/maps/google_maps_api_v3_16.js
-// ==/ClosureCompiler==
+/**
+ * Modified by Jason Wen (zhenshan.wen@gmail.com)
+ */
 
 /**
  * @name CSS3 InfoBubble with tabs for Google Maps API V3
@@ -30,11 +29,11 @@
 /**
  * A CSS3 InfoBubble v0.8
  * @param {Object.<string, *>=} opt_options Optional properties to set.
- * @extends {google.maps.OverlayView}
+ * @extends {qq.maps.Overlay}
  * @constructor
  */
 function InfoBubble(opt_options) {
-  this.extend(InfoBubble, google.maps.OverlayView);
+  this.extend(InfoBubble, qq.maps.Overlay);
   this.tabs_ = [];
   this.activeTab_ = null;
   this.baseZIndex_ = 100;
@@ -225,9 +224,9 @@ InfoBubble.prototype.buildDom_ = function() {
   close.src = this.get('closeSrc');
 
   var that = this;
-  google.maps.event.addDomListener(close, 'click', function() {
+  qq.maps.event.addDomListener(close, 'click', function() {
     that.close();
-    google.maps.event.trigger(that, 'closeclick');
+    qq.maps.event.trigger(that, 'closeclick');
   });
 
   // Content area
@@ -835,7 +834,7 @@ InfoBubble.prototype.addEvents_ = function() {
   this.listeners_ = [];
   for (var i = 0, event; event = events[i]; i++) {
     this.listeners_.push(
-      google.maps.event.addDomListener(bubble, event, function(e) {
+      qq.maps.event.addDomListener(bubble, event, function(e) {
         e.cancelBubble = true;
         if (e.stopPropagation) {
           e.stopPropagation();
@@ -848,7 +847,6 @@ InfoBubble.prototype.addEvents_ = function() {
 
 /**
  * On Adding the InfoBubble to a map
- * Implementing the OverlayView interface
  */
 InfoBubble.prototype.onAdd = function() {
   if (!this.bubble_) {
@@ -867,8 +865,16 @@ InfoBubble.prototype['onAdd'] = InfoBubble.prototype.onAdd;
 
 
 /**
+ * Implement construct method defined by qq.maps.Overlay
+ */
+InfoBubble.prototype.construct = function() {
+  this.onAdd();
+}
+
+
+/**
  * Draw the InfoBubble
- * Implementing the OverlayView interface
+ * Implementing the Overlay interface
  */
 InfoBubble.prototype.draw = function() {
   var projection = this.getProjection();
@@ -878,7 +884,7 @@ InfoBubble.prototype.draw = function() {
     return;
   }
 
-  var latLng = /** @type {google.maps.LatLng} */ (this.get('position'));
+  var latLng = /** @type {qq.maps.LatLng} */ (this.get('position'));
 
   if (!latLng) {
     this.close();
@@ -959,10 +965,18 @@ InfoBubble.prototype.onRemove = function() {
   }
 
   for (var i = 0, listener; listener = this.listeners_[i]; i++) {
-    google.maps.event.removeListener(listener);
+    qq.maps.event.removeListener(listener);
   }
 };
 InfoBubble.prototype['onRemove'] = InfoBubble.prototype.onRemove;
+
+
+/**
+ * Implement destroy method defined by qq.maps.Overlay
+ */
+InfoBubble.prototype.destroy = function() {
+  this.onRemove();
+}
 
 
 /**
@@ -1000,8 +1014,8 @@ InfoBubble.prototype['close'] = InfoBubble.prototype.close;
 /**
  * Open the InfoBubble (asynchronous).
  *
- * @param {google.maps.Map=} opt_map Optional map to open on.
- * @param {google.maps.MVCObject=} opt_anchor Optional anchor to position at.
+ * @param {qq.maps.Map=} opt_map Optional map to open on.
+ * @param {qq.maps.MVCObject=} opt_anchor Optional anchor to position at.
  */
 InfoBubble.prototype.open = function(opt_map, opt_anchor) {
   var that = this;
@@ -1013,8 +1027,8 @@ InfoBubble.prototype.open = function(opt_map, opt_anchor) {
 /**
  * Open the InfoBubble
  * @private
- * @param {google.maps.Map=} opt_map Optional map to open on.
- * @param {google.maps.MVCObject=} opt_anchor Optional anchor to position at.
+ * @param {qq.maps.Map=} opt_map Optional map to open on.
+ * @param {qq.maps.MVCObject=} opt_anchor Optional anchor to position at.
  */
 InfoBubble.prototype.open_ = function(opt_map, opt_anchor) {
   this.updateContent_();
@@ -1057,7 +1071,7 @@ InfoBubble.prototype['open'] = InfoBubble.prototype.open;
 /**
  * Set the position of the InfoBubble
  *
- * @param {google.maps.LatLng} position The position to set.
+ * @param {qq.maps.LatLng} position The position to set.
  */
 InfoBubble.prototype.setPosition = function(position) {
   if (position) {
@@ -1070,10 +1084,10 @@ InfoBubble.prototype['setPosition'] = InfoBubble.prototype.setPosition;
 /**
  * Returns the position of the InfoBubble
  *
- * @return {google.maps.LatLng} the position.
+ * @return {qq.maps.LatLng} the position.
  */
 InfoBubble.prototype.getPosition = function() {
-  return /** @type {google.maps.LatLng} */ (this.get('position'));
+  return /** @type {qq.maps.LatLng} */ (this.get('position'));
 };
 InfoBubble.prototype['getPosition'] = InfoBubble.prototype.getPosition;
 
@@ -1107,7 +1121,7 @@ InfoBubble.prototype.panToView = function() {
   var anchorHeight = this.getAnchorHeight_();
   var height = this.bubble_.offsetHeight + anchorHeight;
   var map = this.get('map');
-  var mapDiv = map.getDiv();
+  var mapDiv = map.getContainer();
   var mapHeight = mapDiv.offsetHeight;
 
   var latLng = this.getPosition();
@@ -1224,11 +1238,11 @@ InfoBubble.prototype.updateContent_ = function() {
       // Because we don't know the size of an image till it loads, add a
       // listener to the image load so the marker can resize and reposition
       // itself to be the correct height.
-      google.maps.event.addDomListener(image, 'load', function() {
+      qq.maps.event.addDomListener(image, 'load', function() {
         that.imageLoaded_();
       });
     }
-    google.maps.event.trigger(this, 'domready');
+    qq.maps.event.trigger(this, 'domready');
   }
   this.redraw_();
 };
@@ -1321,7 +1335,7 @@ InfoBubble.prototype.setTabStyle_ = function(tab) {
  */
 InfoBubble.prototype.addTabActions_ = function(tab) {
   var that = this;
-  tab.listener_ = google.maps.event.addDomListener(tab, 'click', function() {
+  tab.listener_ = qq.maps.event.addDomListener(tab, 'click', function() {
     that.setTabActive_(this);
   });
 };
@@ -1539,7 +1553,7 @@ InfoBubble.prototype.removeTab = function(index) {
   var tab = this.tabs_[index];
   tab.tab.parentNode.removeChild(tab.tab);
 
-  google.maps.event.removeListener(tab.tab.listener_);
+  qq.maps.event.removeListener(tab.tab.listener_);
 
   this.tabs_.splice(index, 1);
 
@@ -1576,7 +1590,7 @@ InfoBubble.prototype['removeTab'] = InfoBubble.prototype.removeTab;
  * @param {Node|string} element The element to size.
  * @param {number=} opt_maxWidth Optional max width of the element.
  * @param {number=} opt_maxHeight Optional max height of the element.
- * @return {google.maps.Size} The size of the element.
+ * @return {qq.maps.Size} The size of the element.
  */
 InfoBubble.prototype.getElementSize_ = function(element, opt_maxWidth,
                                                 opt_maxHeight) {
@@ -1592,19 +1606,19 @@ InfoBubble.prototype.getElementSize_ = function(element, opt_maxWidth,
   }
 
   document.body.appendChild(sizer);
-  var size = new google.maps.Size(sizer.offsetWidth, sizer.offsetHeight);
+  var size = new qq.maps.Size(sizer.offsetWidth, sizer.offsetHeight);
 
   // If the width is bigger than the max width then set the width and size again
   if (opt_maxWidth && size.width > opt_maxWidth) {
     sizer.style['width'] = this.px(opt_maxWidth);
-    size = new google.maps.Size(sizer.offsetWidth, sizer.offsetHeight);
+    size = new qq.maps.Size(sizer.offsetWidth, sizer.offsetHeight);
   }
 
   // If the height is bigger than the max height then set the height and size
   // again
   if (opt_maxHeight && size.height > opt_maxHeight) {
     sizer.style['height'] = this.px(opt_maxHeight);
-    size = new google.maps.Size(sizer.offsetWidth, sizer.offsetHeight);
+    size = new qq.maps.Size(sizer.offsetWidth, sizer.offsetHeight);
   }
 
   document.body.removeChild(sizer);
@@ -1640,7 +1654,7 @@ InfoBubble.prototype.figureOutSize_ = function() {
   var borderRadius = this.getBorderRadius_();
   var arrowSize = this.getArrowSize_();
 
-  var mapDiv = map.getDiv();
+  var mapDiv = map.getContainer();
   var gutter = arrowSize * 2;
   var mapWidth = mapDiv.offsetWidth - gutter;
   var mapHeight = mapDiv.offsetHeight - gutter - this.getAnchorHeight_();
@@ -1750,7 +1764,7 @@ InfoBubble.prototype.figureOutSize_ = function() {
 InfoBubble.prototype.getAnchorHeight_ = function() {
   var anchor = this.get('anchor');
   if (anchor) {
-    var anchorPoint = /** @type google.maps.Point */(this.get('anchorPoint'));
+    var anchorPoint = /** @type qq.maps.Point */(this.get('anchorPoint'));
 
     if (anchorPoint) {
       return -1 * anchorPoint.y;
