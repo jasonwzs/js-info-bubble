@@ -1,7 +1,7 @@
 InfoBubble – A Tencent Maps JavaScript API utility library
 ==============
 
-A Tencent Maps JavaScript API v3 library to create customizable CSS3-based InfoWindows. It supports tabbed content and uses CSS3 for rounded corners, drop shadows, and animations.
+A Tencent Maps JavaScript API library to create customizable CSS3-based InfoWindows. It supports tabbed content and uses CSS3 for rounded corners, drop shadows, and animations.
 
 This library is forked from the original [InfoBubble - A Google Maps JavaScript API utility library](https://github.com/googlemaps/js-info-bubble/).
 
